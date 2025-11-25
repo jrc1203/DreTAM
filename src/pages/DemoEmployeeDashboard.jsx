@@ -8,6 +8,7 @@ import { formatDate, formatCurrency } from '../utils/formatters';
 const DemoEmployeeDashboard = () => {
     // Filter for only "Raj Kumar" claims to simulate employee view
     const [claims] = useState(mockClaims.filter(c => c.employeeName === 'Raj Kumar'));
+    const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'pending', 'approved'
     const [showForm, setShowForm] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
     const [formData, setFormData] = useState({ date: '', description: '', amount: '' });
@@ -27,6 +28,11 @@ const DemoEmployeeDashboard = () => {
         setFormData({ ...formData, [field]: value });
     };
 
+    const filteredClaims = claims.filter(claim => {
+        if (statusFilter !== 'all' && claim.status.toLowerCase() !== statusFilter) return false;
+        return true;
+    });
+
     const totalClaimed = claims.reduce((sum, c) => sum + c.amount, 0);
     const pendingAmount = claims.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.amount, 0);
     const approvedAmount = claims.filter(c => c.status === 'approved').reduce((sum, c) => sum + c.amount, 0);
@@ -44,47 +50,65 @@ const DemoEmployeeDashboard = () => {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="stat-card stat-card-border-purple flex items-center gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <button
+                        onClick={() => setStatusFilter('all')}
+                        className={`stat-card stat-card-border-purple flex items-center justify-between cursor-pointer transition-all duration-300 ${statusFilter === 'all' ? '!bg-purple-100 dark:!bg-purple-900/40 border-purple-500 scale-105 shadow-lg' : 'hover:scale-105'}`}
+                    >
+                        <div>
+                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Total Claimed</h3>
+                            <div className="mt-2">
+                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{formatCurrency(totalClaimed)}</p>
+                                <p className="text-sm font-medium text-purple-600 dark:text-purple-400">{claims.length} claims total</p>
+                            </div>
+                        </div>
                         <div className="icon-circle icon-circle-blue">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <div>
-                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Total Claimed</h3>
-                            <p className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mt-1">{formatCurrency(totalClaimed)}</p>
-                        </div>
-                    </div>
+                    </button>
 
-                    <div className="stat-card stat-card-border-yellow flex items-center gap-4">
+                    <button
+                        onClick={() => setStatusFilter('pending')}
+                        className={`stat-card stat-card-border-yellow flex items-center justify-between cursor-pointer transition-all duration-300 ${statusFilter === 'pending' ? '!bg-yellow-100 dark:!bg-yellow-900/40 border-yellow-500 scale-105 shadow-lg' : 'hover:scale-105'}`}
+                    >
+                        <div>
+                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Pending Approval</h3>
+                            <div className="mt-2">
+                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{formatCurrency(pendingAmount)}</p>
+                                <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">Awaiting approval</p>
+                            </div>
+                        </div>
                         <div className="icon-circle icon-circle-yellow">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <div>
-                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Pending</h3>
-                            <p className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mt-1">{formatCurrency(pendingAmount)}</p>
-                        </div>
-                    </div>
+                    </button>
 
-                    <div className="stat-card stat-card-border-green flex items-center gap-4">
+                    <button
+                        onClick={() => setStatusFilter('approved')}
+                        className={`stat-card stat-card-border-green flex items-center justify-between cursor-pointer transition-all duration-300 ${statusFilter === 'approved' ? '!bg-green-100 dark:!bg-green-900/40 border-green-500 scale-105 shadow-lg' : 'hover:scale-105'}`}
+                    >
+                        <div>
+                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Total Approved</h3>
+                            <div className="mt-2">
+                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{formatCurrency(approvedAmount)}</p>
+                                <p className="text-sm font-medium text-green-600 dark:text-green-400">Claims processed</p>
+                            </div>
+                        </div>
                         <div className="icon-circle icon-circle-green">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <div>
-                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Approved</h3>
-                            <p className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mt-1">{formatCurrency(approvedAmount)}</p>
-                        </div>
-                    </div>
+                    </button>
                 </div>
 
                 {/* New Claim Button */}
                 <div className="mb-6 flex justify-between items-center">
-                    <ExportMenu data={claims} reportTitle="Demo Employee Claims" />
+                    <ExportMenu data={filteredClaims} reportTitle="Demo Employee Claims" />
                     <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -147,7 +171,7 @@ const DemoEmployeeDashboard = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {claims.map((claim) => (
+                                {filteredClaims.map((claim) => (
                                     <tr key={claim.id} className="border-b border-gray-200 dark:border-white/10 hover:bg-white/50 dark:hover:bg-white/5 transition-colors">
                                         <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{formatDate(claim.date)}</td>
                                         <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">{claim.description}</td>

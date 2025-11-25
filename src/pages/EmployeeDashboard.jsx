@@ -3,6 +3,7 @@ import { collection, addDoc, query, where, onSnapshot, serverTimestamp, deleteDo
 import { auth, db } from '../firebase';
 import ExportMenu from '../components/ExportMenu';
 import Toast from '../components/Toast';
+import Navbar from '../components/Navbar';
 import { formatDate, formatCurrency } from '../utils/formatters';
 
 const EmployeeDashboard = () => {
@@ -14,6 +15,7 @@ const EmployeeDashboard = () => {
         amount: ''
     });
     const [filterDate, setFilterDate] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'pending', 'approved'
 
     // UI States
     const [isLoading, setIsLoading] = useState(true);
@@ -148,17 +150,20 @@ const EmployeeDashboard = () => {
         }
     };
 
-    const filteredClaims = claims.filter(claim => {
+    // Base filter (Date only) - used for Stats
+    const baseFilteredClaims = claims.filter(claim => {
         return filterDate ? claim.date === filterDate : true;
     });
 
-    const totalPending = filteredClaims
-        .filter(c => c.status === 'Pending')
-        .reduce((sum, c) => sum + Number(c.amount), 0);
+    // Final filter (Base + Status) - used for Table
+    const filteredClaims = baseFilteredClaims.filter(claim => {
+        return statusFilter === 'all' ? true : claim.status.toLowerCase() === statusFilter;
+    });
 
-    const totalApproved = filteredClaims
-        .filter(c => c.status === 'Approved')
-        .reduce((sum, c) => sum + Number(c.amount), 0);
+    // Calculate Stats from Base Filter (Persistent)
+    const totalPending = baseFilteredClaims.filter(c => c.status === 'Pending').length;
+    const totalApproved = baseFilteredClaims.filter(c => c.status === 'Approved').length;
+    const totalAmount = baseFilteredClaims.reduce((sum, c) => sum + Number(c.amount), 0);
 
     if (isLoading) {
         return (
@@ -170,6 +175,7 @@ const EmployeeDashboard = () => {
 
     return (
         <div className="transition-colors duration-300 relative">
+            <Navbar userRole="employee" />
             {toast.visible && (
                 <Toast
                     message={toast.message}
@@ -188,7 +194,7 @@ const EmployeeDashboard = () => {
                     </div>
                     <button
                         onClick={() => setShowForm(true)}
-                        className="btn-primary flex items-center gap-2"
+                        className="btn-primary flex items-center gap-2 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transform hover:-translate-y-0.5 transition-all duration-300"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -198,29 +204,60 @@ const EmployeeDashboard = () => {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div className="stat-card stat-card-border-yellow flex items-center justify-between">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <button
+                        onClick={() => setStatusFilter('all')}
+                        className={`stat-card stat-card-border-purple flex items-center justify-between cursor-pointer transition-all duration-300 ${statusFilter === 'all' ? '!bg-purple-100 dark:!bg-purple-900/40 border-purple-500 scale-105 shadow-lg' : 'hover:scale-105'}`}
+                    >
+                        <div>
+                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">All My Claims</h3>
+                            <div className="mt-2">
+                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{formatCurrency(totalAmount)}</p>
+                                <p className="text-sm font-medium text-purple-600 dark:text-purple-400">{baseFilteredClaims.length} claims total</p>
+                            </div>
+                        </div>
+                        <div className="icon-circle icon-circle-blue">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        </div>
+                    </button>
+
+                    <button
+                        onClick={() => setStatusFilter('pending')}
+                        className={`stat-card stat-card-border-yellow flex items-center justify-between cursor-pointer transition-all duration-300 ${statusFilter === 'pending' ? '!bg-yellow-100 dark:!bg-yellow-900/40 border-yellow-500 scale-105 shadow-lg' : 'hover:scale-105'}`}
+                    >
                         <div>
                             <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Pending Approval</h3>
-                            <p className="text-3xl font-bold text-gray-800 dark:text-white mt-2">{formatCurrency(totalPending)}</p>
+                            <div className="mt-2">
+                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{totalPending}</p>
+                                <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">Awaiting approval</p>
+                            </div>
                         </div>
                         <div className="icon-circle icon-circle-yellow">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                    </div>
-                    <div className="stat-card stat-card-border-green flex items-center justify-between">
+                    </button>
+
+                    <button
+                        onClick={() => setStatusFilter('approved')}
+                        className={`stat-card stat-card-border-green flex items-center justify-between cursor-pointer transition-all duration-300 ${statusFilter === 'approved' ? '!bg-green-100 dark:!bg-green-900/40 border-green-500 scale-105 shadow-lg' : 'hover:scale-105'}`}
+                    >
                         <div>
                             <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Total Approved</h3>
-                            <p className="text-3xl font-bold text-gray-800 dark:text-white mt-2">{formatCurrency(totalApproved)}</p>
+                            <div className="mt-2">
+                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{totalApproved}</p>
+                                <p className="text-sm font-medium text-green-600 dark:text-green-400">Claims processed</p>
+                            </div>
                         </div>
                         <div className="icon-circle icon-circle-green">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                    </div>
+                    </button>
                 </div>
 
                 {/* Filters */}

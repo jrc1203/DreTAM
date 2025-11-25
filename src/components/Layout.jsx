@@ -1,5 +1,4 @@
 import React from 'react';
-import Navbar from './Navbar';
 
 const Layout = ({ children }) => {
     return (
@@ -13,8 +12,7 @@ const Layout = ({ children }) => {
 
             {/* Content Wrapper */}
             <div className="relative z-10 flex flex-col min-h-screen">
-                <Navbar />
-                <main className="container mx-auto px-4 py-8 flex-grow">
+                <main className="flex-grow">
                     {children}
                 </main>
             </div>

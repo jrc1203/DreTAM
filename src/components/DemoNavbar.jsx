@@ -17,8 +17,8 @@ const DemoNavbar = ({ userRole = 'Demo User' }) => {
     };
 
     return (
-        <nav className="sticky top-6 z-50 mx-auto max-w-7xl px-4 mb-8">
-            <div className="glass rounded-full px-6 py-3 flex justify-between items-center transition-all duration-300 shadow-xl">
+        <nav className="sticky top-6 z-50 flex justify-center px-4 mb-8">
+            <div className="glass rounded-full px-6 py-3 flex justify-between items-center transition-all duration-300 shadow-xl w-auto max-w-7xl">
                 <div className="flex items-center gap-4 sm:gap-8">
                     <Link to="/" className="text-2xl font-bold tracking-tight flex items-center gap-2 group">
                         <span className="text-gradient group-hover:scale-105 transition-transform duration-300">

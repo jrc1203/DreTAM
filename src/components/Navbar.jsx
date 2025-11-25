@@ -4,7 +4,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useTheme } from '../context/ThemeContext';
 
-const Navbar = () => {
+const Navbar = ({ userRole }) => {
     const user = auth.currentUser;
     const { theme, setTheme } = useTheme();
 
@@ -23,8 +23,8 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="sticky top-6 z-50 mx-auto max-w-7xl px-4 mb-8">
-            <div className="glass rounded-full px-6 py-3 flex justify-between items-center transition-all duration-300 shadow-xl">
+        <nav className="sticky top-6 z-50 flex justify-center px-4 mb-8">
+            <div className="glass rounded-full px-6 py-3 flex justify-between items-center transition-all duration-300 shadow-xl w-auto max-w-7xl">
 
                 {/* Logo Section */}
                 <div className="flex items-center gap-8">
@@ -35,7 +35,7 @@ const Navbar = () => {
                     </Link>
 
                     {/* Manage Users Navigation */}
-                    {user && user.email === import.meta.env.VITE_ADMIN_EMAIL && (
+                    {user && (userRole === 'admin' || userRole === 'manager') && (
                         <div className="flex items-center">
                             <Link
                                 to="/users"
@@ -56,7 +56,15 @@ const Navbar = () => {
                     {user && (
                         <div className="flex items-center gap-3 pl-4 ml-6 border-l border-gray-200 dark:border-white/10">
                             <div className="text-right hidden sm:block">
-                                <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">{user.displayName}</p>
+                                <div className="flex items-center justify-end gap-2 mb-0.5">
+                                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">{user.displayName}</p>
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${userRole === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-200' :
+                                        userRole === 'manager' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-200' :
+                                            'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-200'
+                                        }`}>
+                                        {userRole}
+                                    </span>
+                                </div>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                             </div>
                             {user.photoURL ? (

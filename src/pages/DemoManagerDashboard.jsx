@@ -10,20 +10,29 @@ const DemoManagerDashboard = () => {
     const [claims] = useState(mockClaims);
     const [users] = useState(mockUsers.filter(u => u.role === 'employee'));
     const [filters, setFilters] = useState({ employee: '', date: '' });
+    const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'pending', 'approved'
     const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
 
     const showToast = (message, type = 'info') => {
         setToast({ show: true, message, type });
     };
 
-    const filteredClaims = claims.filter(claim => {
+    // Base filter (Employee & Date only) - used for Stats
+    const baseFilteredClaims = claims.filter(claim => {
         if (filters.employee && claim.employeeEmail !== filters.employee) return false;
         if (filters.date && claim.date !== filters.date) return false;
         return true;
     });
 
-    const pendingClaims = claims.filter(c => c.status === 'pending').length;
-    const totalAmount = claims.reduce((sum, c) => sum + c.amount, 0);
+    // Final filter (Base + Status) - used for Table
+    const filteredClaims = baseFilteredClaims.filter(claim => {
+        if (statusFilter !== 'all' && claim.status.toLowerCase() !== statusFilter) return false;
+        return true;
+    });
+
+    // Calculate stats from base filtered claims
+    const totalPending = baseFilteredClaims.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.amount, 0);
+    const totalApproved = baseFilteredClaims.filter(c => c.status === 'approved').reduce((sum, c) => sum + c.amount, 0);
 
     const handleAction = (action) => {
         showToast(`🎭 Demo Mode: ${action} action successful! (Data not saved)`, 'info');
@@ -41,31 +50,52 @@ const DemoManagerDashboard = () => {
                     <p className="text-gray-600 dark:text-gray-300">Review and approve team expense claims</p>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div className="stat-card stat-card-border-purple flex items-center gap-4">
+                {/* Stats Cards - 3 columns */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <button onClick={() => setStatusFilter('all')} className={`stat-card stat-card-border-purple flex items-center justify-between cursor-pointer transition-all duration-300 ${statusFilter === 'all' ? '!bg-purple-100 dark:!bg-purple-900/40 border-purple-500 scale-105 shadow-lg' : 'hover:scale-105'}`}>
+                        <div>
+                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">All Claims</h3>
+                            <div className="mt-2">
+                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{baseFilteredClaims.length}</p>
+                                <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Total</p>
+                            </div>
+                        </div>
+                        <div className="icon-circle icon-circle-blue">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        </div>
+                    </button>
+
+                    <button onClick={() => setStatusFilter('pending')} className={`stat-card stat-card-border-yellow flex items-center justify-between cursor-pointer transition-all duration-300 ${statusFilter === 'pending' ? '!bg-yellow-100 dark:!bg-yellow-900/40 border-yellow-500 scale-105 shadow-lg' : 'hover:scale-105'}`}>
+                        <div>
+                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Pending Approval</h3>
+                            <div className="mt-2">
+                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{formatCurrency(totalPending)}</p>
+                                <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">Pending Amount</p>
+                            </div>
+                        </div>
                         <div className="icon-circle icon-circle-yellow">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <div>
-                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Pending Reviews</h3>
-                            <p className="text-3xl font-bold text-gray-800 dark:text-white mt-1">{pendingClaims}</p>
-                        </div>
-                    </div>
+                    </button>
 
-                    <div className="stat-card stat-card-border-green flex items-center gap-4">
-                        <div className="icon-circle icon-circle-purple">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <button onClick={() => setStatusFilter('approved')} className={`stat-card stat-card-border-green flex items-center justify-between cursor-pointer transition-all duration-300 ${statusFilter === 'approved' ? '!bg-green-100 dark:!bg-green-900/40 border-green-500 scale-105 shadow-lg' : 'hover:scale-105'}`}>
+                        <div>
+                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Total Approved</h3>
+                            <div className="mt-2">
+                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{formatCurrency(totalApproved)}</p>
+                                <p className="text-sm font-medium text-green-600 dark:text-green-400">Approved Amount</p>
+                            </div>
+                        </div>
+                        <div className="icon-circle icon-circle-green">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <div>
-                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Total Amount</h3>
-                            <p className="text-3xl font-bold text-gray-800 dark:text-white mt-1">{formatCurrency(totalAmount)}</p>
-                        </div>
-                    </div>
+                    </button>
                 </div>
 
                 {/* Filters Section */}

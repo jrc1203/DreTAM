@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
-import { db } from '../firebase';
-import { Link } from 'react-router-dom';
+import { collection, query, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, deleteDoc, getDoc } from 'firebase/firestore';
+import { db, auth } from '../firebase';
+import Navbar from '../components/Navbar';
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
     const [newUser, setNewUser] = useState({ email: '', name: '', role: 'employee' });
     const [editingUser, setEditingUser] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentUserRole, setCurrentUserRole] = useState(null);
 
     // Validation & UI State
     const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +19,27 @@ const UserManagement = () => {
 
     // Email validation regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    useEffect(() => {
+        const fetchCurrentUserRole = async () => {
+            const user = auth.currentUser;
+            if (user) {
+                if (user.email === import.meta.env.VITE_ADMIN_EMAIL) {
+                    setCurrentUserRole('admin');
+                    return;
+                }
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        setCurrentUserRole(userDoc.data().role);
+                    }
+                } catch (error) {
+                    console.error("Error fetching user role:", error);
+                }
+            }
+        };
+        fetchCurrentUserRole();
+    }, []);
 
     const validateField = (name, value) => {
         let error = '';
@@ -93,6 +115,13 @@ const UserManagement = () => {
         return () => unsubscribeUsers();
     }, []);
 
+    // Filter users based on current user role
+    const filteredUsers = users.filter(user => {
+        if (currentUserRole === 'admin') return true;
+        if (currentUserRole === 'manager') return user.role === 'employee';
+        return false;
+    });
+
     const handleAddUser = async (e) => {
         e.preventDefault();
 
@@ -111,15 +140,11 @@ const UserManagement = () => {
 
         if (nameError || emailError) return;
 
-        if (nameError || emailError) return;
-
         setIsLoading(true);
         setErrorMessage('');
         setSuccessMessage('');
 
         try {
-            // Check for duplicate email (optional but good practice)
-            // For now, just add to Firestore
             await addDoc(collection(db, 'users'), {
                 email: newUser.email,
                 name: newUser.name,
@@ -129,7 +154,6 @@ const UserManagement = () => {
 
             setSuccessMessage('User added successfully!');
 
-            // Close modal after short delay to show success message
             setTimeout(() => {
                 setIsModalOpen(false);
                 setSuccessMessage('');
@@ -170,6 +194,7 @@ const UserManagement = () => {
 
     return (
         <div className="transition-colors duration-300">
+            <Navbar userRole={currentUserRole} />
             <div className="container mx-auto px-4 py-8">
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -178,7 +203,10 @@ const UserManagement = () => {
                         <p className="text-gray-500 dark:text-gray-400">Manage authorized users and roles</p>
                     </div>
                     <button
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={() => {
+                            setNewUser(prev => ({ ...prev, role: currentUserRole === 'manager' ? 'employee' : 'employee' }));
+                            setIsModalOpen(true);
+                        }}
                         className="btn-primary flex items-center gap-2"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -192,7 +220,7 @@ const UserManagement = () => {
                     {/* Users List */}
                     <div>
                         <div className="flex flex-col gap-3">
-                            {users.map(user => (
+                            {filteredUsers.map(user => (
                                 <div key={user.id} className="bg-white/50 dark:bg-white/5 px-4 sm:px-6 py-4 rounded-lg flex items-center justify-between gap-2 sm:gap-4 border border-white/10 hover:bg-white/70 dark:hover:bg-white/10 transition-colors">
                                     {editingUser?.id === user.id ? (
                                         <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0 flex-wrap">
@@ -206,9 +234,10 @@ const UserManagement = () => {
                                                 value={editingUser.role}
                                                 onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
                                                 className="p-2 border rounded text-sm w-28 sm:w-32 dark:bg-gray-600 dark:text-white"
+                                                disabled={currentUserRole === 'manager'}
                                             >
                                                 <option value="employee">Employee</option>
-                                                <option value="manager">Manager</option>
+                                                {currentUserRole === 'admin' && <option value="manager">Manager</option>}
                                             </select>
                                             <div className="flex gap-2 ml-auto">
                                                 <button onClick={() => handleUpdateUser(editingUser)} className="btn-success px-3 sm:px-4 py-2 text-sm">Save</button>
@@ -222,7 +251,10 @@ const UserManagement = () => {
                                                     <span className="font-bold text-gray-800 dark:text-white text-base truncate">{user.name}</span>
                                                     <span className="text-gray-500 dark:text-gray-400 text-sm truncate">{user.email}</span>
                                                 </div>
-                                                <span className={`badge flex-shrink-0 ${user.role === 'manager' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200' : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'}`}>
+                                                <span className={`badge flex-shrink-0 ${user.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200' :
+                                                        user.role === 'manager' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' :
+                                                            'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'
+                                                    }`}>
                                                     {user.role}
                                                 </span>
                                             </div>
@@ -242,7 +274,7 @@ const UserManagement = () => {
                                     )}
                                 </div>
                             ))}
-                            {users.length === 0 && <span className="text-gray-500 dark:text-gray-400 text-center py-8">No users added yet.</span>}
+                            {filteredUsers.length === 0 && <span className="text-gray-500 dark:text-gray-400 text-center py-8">No users found.</span>}
                         </div>
                     </div>
                 </div>
@@ -335,10 +367,10 @@ const UserManagement = () => {
                                         value={newUser.role}
                                         onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                                         className="input-field cursor-pointer"
-                                        disabled={isLoading}
+                                        disabled={isLoading || currentUserRole === 'manager'}
                                     >
                                         <option value="employee">Employee</option>
-                                        <option value="manager">Manager</option>
+                                        {currentUserRole === 'admin' && <option value="manager">Manager</option>}
                                     </select>
                                 </div>
 
