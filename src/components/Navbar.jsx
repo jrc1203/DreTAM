@@ -54,7 +54,7 @@ const Navbar = ({ userRole }) => {
                 {/* Right Side Actions */}
                 <div className="flex items-center gap-4">
                     {user && (
-                        <div className="flex items-center gap-3 pl-4 ml-6 border-l border-gray-200 dark:border-white/10">
+                        <div className="flex items-center gap-3 pl-4 ml-2 sm:ml-6 border-l border-gray-200 dark:border-white/10">
                             <div className="text-right hidden sm:block">
                                 <div className="flex items-center justify-end gap-2 mb-0.5">
                                     <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">{user.displayName}</p>
@@ -67,17 +67,27 @@ const Navbar = ({ userRole }) => {
                                 </div>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                             </div>
-                            {user.photoURL ? (
-                                <img
-                                    src={user.photoURL}
-                                    alt={user.displayName}
-                                    className="w-9 h-9 rounded-full border-2 border-purple-200 dark:border-purple-500/30 shadow-sm"
-                                />
-                            ) : (
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#ec4899] flex items-center justify-center text-white font-bold shadow-lg text-sm">
-                                    {user.displayName ? user.displayName.charAt(0) : 'U'}
-                                </div>
-                            )}
+                            {/* Avatar with mobile badge */}
+                            <div className="flex flex-col items-center gap-1">
+                                {user.photoURL ? (
+                                    <img
+                                        src={user.photoURL}
+                                        alt={user.displayName}
+                                        className="w-9 h-9 rounded-full border-2 border-purple-200 dark:border-purple-500/30 shadow-sm"
+                                    />
+                                ) : (
+                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#ec4899] flex items-center justify-center text-white font-bold shadow-lg text-sm">
+                                        {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                                    </div>
+                                )}
+                                {/* Role badge - visible only on mobile */}
+                                <span className={`sm:hidden text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${userRole === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-200' :
+                                        userRole === 'manager' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-200' :
+                                            'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-200'
+                                    }`}>
+                                    {userRole}
+                                </span>
+                            </div>
                         </div>
                     )}
 

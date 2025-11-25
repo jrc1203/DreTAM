@@ -37,7 +37,7 @@ const FilterDropdown = ({ options, value, onChange, defaultLabel = 'All Employee
                 </button>
 
                 {isOpen && (
-                    <div className="origin-top-left absolute left-0 mt-2 w-64 rounded-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl z-[100] animate-fade-in-down max-h-60 overflow-y-auto custom-scrollbar">
+                    <div className="origin-top-left absolute left-0 mt-2 w-64 rounded-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl z-[60] animate-fade-in-down max-h-60 overflow-y-auto custom-scrollbar">
                         <div className="py-1">
                             <button
                                 onClick={() => handleSelect('')}

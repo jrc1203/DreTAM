@@ -105,17 +105,17 @@ const AdminDashboard = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
             <Navbar userRole="admin" />
-            
+
             {toast.visible && (
-                <Toast 
-                    message={toast.message} 
-                    type={toast.type} 
-                    onClose={hideToast} 
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={hideToast}
                 />
             )}
 
             <div className="container mx-auto px-4 py-8">
-                
+
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <div>
@@ -125,8 +125,8 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Stats Cards Grid - 4 columns */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <button 
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+                    <button
                         onClick={() => setStatusFilter('all')}
                         className={`stat-card stat-card-border-purple flex flex-col cursor-pointer transition-all duration-300 ${statusFilter === 'all' ? '!bg-purple-100 dark:!bg-purple-900/40 border-purple-500 scale-105 shadow-lg' : 'hover:scale-105'}`}
                     >
@@ -142,7 +142,7 @@ const AdminDashboard = () => {
                         </div>
                     </button>
 
-                    <button 
+                    <button
                         onClick={() => setStatusFilter('pending')}
                         className={`stat-card stat-card-border-yellow flex flex-col cursor-pointer transition-all duration-300 ${statusFilter === 'pending' ? '!bg-yellow-100 dark:!bg-yellow-900/40 border-yellow-500 scale-105 shadow-lg' : 'hover:scale-105'}`}
                     >
@@ -158,7 +158,7 @@ const AdminDashboard = () => {
                         </div>
                     </button>
 
-                    <button 
+                    <button
                         onClick={() => setStatusFilter('approved')}
                         className={`stat-card stat-card-border-green flex flex-col cursor-pointer transition-all duration-300 ${statusFilter === 'approved' ? '!bg-green-100 dark:!bg-green-900/40 border-green-500 scale-105 shadow-lg' : 'hover:scale-105'}`}
                     >
@@ -174,7 +174,7 @@ const AdminDashboard = () => {
                         </div>
                     </button>
 
-                    <button 
+                    <button
                         onClick={() => setStatusFilter('rejected')}
                         className={`stat-card stat-card-border-red flex flex-col cursor-pointer transition-all duration-300 ${statusFilter === 'rejected' ? '!bg-red-100 dark:!bg-red-900/40 border-red-500 scale-105 shadow-lg' : 'hover:scale-105'}`}
                     >
@@ -192,10 +192,11 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Filters Section */}
-                <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 relative z-50">
+                {/* Filters Section - Always horizontal layout */}
+                <div className="flex flex-row flex-wrap justify-between items-center mb-6 gap-3 sm:gap-4 relative z-50">
                     <ExportMenu data={filteredClaims} reportTitle="Claims Report" />
 
-                    <div className="flex flex-col sm:flex-row gap-4 items-center glass p-3 rounded-lg">
+                    <div className="flex flex-row gap-3 sm:gap-4 items-center glass p-3 rounded-lg flex-wrap sm:flex-nowrap">
                         <FilterDropdown
                             options={users.map(user => ({ value: user.email, label: user.name }))}
                             value={filters.employee}

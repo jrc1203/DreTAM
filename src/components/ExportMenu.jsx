@@ -23,7 +23,7 @@ const ExportMenu = ({ data, reportTitle = 'Claims Report' }) => {
     };
 
     return (
-        <div className="glass p-3 rounded-lg">
+        <div className="glass p-3 rounded-lg relative z-[60]">
             <div className="relative inline-block text-left" ref={menuRef}>
                 <button
                     type="button"
