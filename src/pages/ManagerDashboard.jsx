@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
-import Navbar from '../components/Navbar';
 import ExportMenu from '../components/ExportMenu';
+import { formatDate, formatCurrency } from '../utils/formatters';
 
 const ManagerDashboard = () => {
     const [claims, setClaims] = useState([]);
     const [users, setUsers] = useState([]);
     const [filters, setFilters] = useState({ employee: '', date: '' });
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         // Fetch Claims
-        const q = query(collection(db, 'claims'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'claims'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const claimsData = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
+            // Sort by Claim Date (descending)
+            claimsData.sort((a, b) => new Date(b.date) - new Date(a.date));
             setClaims(claimsData);
+            setIsLoading(false);
         });
 
         // Fetch Users for filter
@@ -51,55 +55,79 @@ const ManagerDashboard = () => {
         .filter(c => c.status === 'Approved')
         .reduce((sum, c) => sum + Number(c.amount), 0);
 
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6C63FF]"></div>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-            <Navbar />
+        <div className="transition-colors duration-300">
             <div className="container mx-auto px-4 py-8">
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
-                        <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">Pending Approval</h3>
-                        <p className="text-3xl font-bold text-gray-800 dark:text-white mt-2">₹{totalPending.toLocaleString()}</p>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 border-green-500">
-                        <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">Total Approved</h3>
-                        <p className="text-3xl font-bold text-gray-800 dark:text-white mt-2">₹{totalApproved.toLocaleString()}</p>
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">All Claims</h1>
+                        <p className="text-gray-500 dark:text-gray-400">Manager View</p>
                     </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">All Claims (Manager View)</h2>
-                        <ExportMenu data={filteredClaims} reportTitle="Manager Claims Report" />
+                {/* Stats Cards - 2 columns */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="stat-card stat-card-border-yellow flex items-center justify-between">
+                        <div>
+                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Pending Approval</h3>
+                            <p className="text-3xl font-bold text-gray-800 dark:text-white mt-2">{formatCurrency(totalPending)}</p>
+                        </div>
+                        <div className="icon-circle icon-circle-yellow">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
                     </div>
+                    <div className="stat-card stat-card-border-green flex items-center justify-between">
+                        <div>
+                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Total Approved</h3>
+                            <p className="text-3xl font-bold text-gray-800 dark:text-white mt-2">{formatCurrency(totalApproved)}</p>
+                        </div>
+                        <div className="icon-circle icon-circle-green">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
 
-                    {/* Filters */}
-                    <div className="flex gap-4 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm transition-colors duration-300">
-                        <div>
-                            <select
-                                value={filters.employee}
-                                onChange={(e) => setFilters({ ...filters, employee: e.target.value })}
-                                className="p-2 border rounded text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            >
-                                <option value="">All Employees</option>
-                                {users.map(user => (
-                                    <option key={user.id} value={user.email}>{user.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div>
-                            <input
-                                type="date"
-                                value={filters.date}
-                                onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-                                className="p-2 border rounded text-sm outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            />
-                        </div>
+                {/* Filters Section */}
+                <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <ExportMenu data={filteredClaims} reportTitle="Manager Claims Report" />
+
+                    <div className="flex flex-col sm:flex-row gap-4 glass p-3 rounded-lg w-full md:w-auto">
+                        <select
+                            value={filters.employee}
+                            onChange={(e) => setFilters({ ...filters, employee: e.target.value })}
+                            className="px-4 py-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#6C63FF] bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white"
+                        >
+                            <option value="">All Employees</option>
+                            {users.map(user => (
+                                <option key={user.id} value={user.email}>{user.name}</option>
+                            ))}
+                        </select>
+
+                        <input
+                            type="date"
+                            value={filters.date}
+                            onChange={(e) => setFilters({ ...filters, date: e.target.value })}
+                            className="px-4 py-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#6C63FF] bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white"
+                        />
+
                         {(filters.employee || filters.date) && (
                             <button
                                 onClick={() => setFilters({ employee: '', date: '' })}
-                                className="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                                className="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 px-2"
                             >
                                 Clear
                             </button>
@@ -107,33 +135,34 @@ const ManagerDashboard = () => {
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden transition-colors duration-300">
+                {/* Claims Table */}
+                <div className="glass rounded-2xl overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead className="bg-gray-50 dark:bg-gray-700">
+                            <thead className="table-header">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Employee</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-4 text-left table-header-text">Employee</th>
+                                    <th className="px-6 py-4 text-left table-header-text">Date</th>
+                                    <th className="px-6 py-4 text-left table-header-text">Description</th>
+                                    <th className="px-6 py-4 text-left table-header-text">Amount</th>
+                                    <th className="px-6 py-4 text-left table-header-text">Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-transparent">
                                 {filteredClaims.map((claim) => (
-                                    <tr key={claim.id}>
+                                    <tr key={claim.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm font-medium text-gray-900 dark:text-gray-200">{claim.userName}</div>
                                             <div className="text-sm text-gray-500 dark:text-gray-400">{claim.email}</div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">{claim.date}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">{formatDate(claim.date)}</td>
                                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-200">{claim.description}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">₹{claim.amount}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">{formatCurrency(claim.amount)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${claim.status === 'Approved' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                                                    claim.status === 'Rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                                                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'}`}>
+                                            <span className={`badge ${claim.status === 'Approved' ? 'badge-approved' :
+                                                claim.status === 'Rejected' ? 'badge-rejected' :
+                                                    'badge-pending'
+                                                }`}>
                                                 {claim.status}
                                             </span>
                                         </td>
@@ -141,7 +170,9 @@ const ManagerDashboard = () => {
                                 ))}
                                 {filteredClaims.length === 0 && (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">No claims found</td>
+                                        <td colSpan="5" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                            No claims found
+                                        </td>
                                     </tr>
                                 )}
                             </tbody>

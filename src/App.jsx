@@ -7,7 +7,9 @@ import Login from './pages/Login';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ManagerDashboard from './pages/ManagerDashboard';
+import UserManagement from './pages/UserManagement';
 import { ThemeProvider } from './context/ThemeContext';
+import Layout from './components/Layout';
 
 function App() {
     const [user, setUser] = useState(null);
@@ -59,15 +61,29 @@ function App() {
                         path="/"
                         element={
                             user && authorized ? (
-                                user.email === import.meta.env.VITE_ADMIN_EMAIL ? (
-                                    <AdminDashboard />
-                                ) : user.role === 'manager' ? (
-                                    <ManagerDashboard />
-                                ) : (
-                                    <EmployeeDashboard />
-                                )
+                                <Layout>
+                                    {user.email === import.meta.env.VITE_ADMIN_EMAIL ? (
+                                        <AdminDashboard />
+                                    ) : user.role === 'manager' ? (
+                                        <ManagerDashboard />
+                                    ) : (
+                                        <EmployeeDashboard />
+                                    )}
+                                </Layout>
                             ) : (
                                 <Navigate to="/login" />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/users"
+                        element={
+                            user && authorized && user.email === import.meta.env.VITE_ADMIN_EMAIL ? (
+                                <Layout>
+                                    <UserManagement />
+                                </Layout>
+                            ) : (
+                                <Navigate to="/" />
                             )
                         }
                     />
