@@ -189,167 +189,44 @@ const UserManagement = () => {
                 </div>
 
                 <div className="glass rounded-2xl p-6 mb-8 transition-colors duration-300">
-
-                    {/* Modal */}
-                    {isModalOpen && (
-                        <div
-                            className="fixed inset-0 bg-black/20 backdrop-blur-2xl flex items-center justify-center z-50 p-4 transition-all duration-300"
-                            onClick={() => setIsModalOpen(false)}
-                        >
-                            <div
-                                className="glass rounded-2xl border border-white/10 shadow-2xl w-full max-w-md p-8 relative animate-fade-in overflow-hidden"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <button
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-all"
-                                    aria-label="Close modal"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-
-                                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Add New User</h3>
-
-                                {successMessage && (
-                                    <div className="mb-4 p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-green-700 dark:text-green-300 text-sm flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                        </svg>
-                                        {successMessage}
-                                    </div>
-                                )}
-
-                                {errorMessage && (
-                                    <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-700 dark:text-red-300 text-sm flex items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                        </svg>
-                                        {errorMessage}
-                                    </div>
-                                )}
-
-                                <form onSubmit={handleAddUser} className="flex flex-col">
-                                    <div className="mb-6">
-                                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-white/70 mb-2">
-                                            Name <span className="text-pink-500">*</span>
-                                        </label>
-                                        <input
-                                            id="name"
-                                            type="text"
-                                            value={newUser.name}
-                                            onChange={(e) => handleChange('name', e.target.value)}
-                                            onBlur={() => handleBlur('name')}
-                                            className={`input-field ${errors.name && touched.name ? 'border-red-500 focus:ring-red-500' : ''}`}
-                                            placeholder="Joyrc"
-                                            disabled={isLoading}
-                                        />
-                                        {errors.name && touched.name && (
-                                            <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="mb-6">
-                                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-white/70 mb-2">
-                                            Email <span className="text-pink-500">*</span>
-                                        </label>
-                                        <input
-                                            id="email"
-                                            type="email"
-                                            value={newUser.email}
-                                            onChange={(e) => handleChange('email', e.target.value)}
-                                            onBlur={() => handleBlur('email')}
-                                            className={`input-field ${errors.email && touched.email ? 'border-red-500 focus:ring-red-500' : ''}`}
-                                            placeholder="Joyrc@example.com"
-                                            disabled={isLoading}
-                                        />
-                                        {errors.email && touched.email && (
-                                            <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="mb-8">
-                                        <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-white/70 mb-2">
-                                            Role
-                                        </label>
-                                        <select
-                                            id="role"
-                                            value={newUser.role}
-                                            onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                                            className="input-field cursor-pointer"
-                                            disabled={isLoading}
-                                        >
-                                            <option value="employee">Employee</option>
-                                            <option value="manager">Manager</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="flex justify-end gap-3">
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsModalOpen(false)}
-                                            className="px-6 py-2.5 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200"
-                                            disabled={isLoading}
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className="btn-primary flex items-center justify-center min-w-[120px]"
-                                            disabled={!isFormValid() || isLoading}
-                                        >
-                                            {isLoading ? (
-                                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
-                                            ) : (
-                                                'Save User'
-                                            )}
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Users List */}
                     <div>
                         <div className="flex flex-col gap-3">
                             {users.map(user => (
-                                <div key={user.id} className="bg-white/50 dark:bg-white/5 px-6 py-4 rounded-lg flex items-center justify-between gap-4 border border-white/10 hover:bg-white/70 dark:hover:bg-white/10 transition-colors">
+                                <div key={user.id} className="bg-white/50 dark:bg-white/5 px-4 sm:px-6 py-4 rounded-lg flex items-center justify-between gap-2 sm:gap-4 border border-white/10 hover:bg-white/70 dark:hover:bg-white/10 transition-colors">
                                     {editingUser?.id === user.id ? (
-                                        <div className="flex items-center gap-4 flex-1">
+                                        <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0 flex-wrap">
                                             <input
                                                 type="text"
                                                 value={editingUser.name}
                                                 onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                                                className="p-2 border rounded text-sm flex-1 dark:bg-gray-600 dark:text-white"
+                                                className="p-2 border rounded text-sm flex-1 min-w-[120px] dark:bg-gray-600 dark:text-white"
                                             />
                                             <select
                                                 value={editingUser.role}
                                                 onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                                                className="p-2 border rounded text-sm w-32 dark:bg-gray-600 dark:text-white"
+                                                className="p-2 border rounded text-sm w-28 sm:w-32 dark:bg-gray-600 dark:text-white"
                                             >
                                                 <option value="employee">Employee</option>
                                                 <option value="manager">Manager</option>
                                             </select>
-                                            <button onClick={() => handleUpdateUser(editingUser)} className="btn-success">Save</button>
-                                            <button onClick={() => setEditingUser(null)} className="btn-secondary px-4 py-2">Cancel</button>
+                                            <div className="flex gap-2 ml-auto">
+                                                <button onClick={() => handleUpdateUser(editingUser)} className="btn-success px-3 sm:px-4 py-2 text-sm">Save</button>
+                                                <button onClick={() => setEditingUser(null)} className="btn-secondary px-3 sm:px-4 py-2 text-sm">Cancel</button>
+                                            </div>
                                         </div>
                                     ) : (
                                         <>
-                                            <div className="flex items-center gap-4 flex-1">
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-gray-800 dark:text-white text-base">{user.name}</span>
-                                                    <span className="text-gray-500 dark:text-gray-400">{user.email}</span>
+                                            <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                                                <div className="flex flex-col min-w-0 flex-1">
+                                                    <span className="font-bold text-gray-800 dark:text-white text-base truncate">{user.name}</span>
+                                                    <span className="text-gray-500 dark:text-gray-400 text-sm truncate">{user.email}</span>
                                                 </div>
-                                                <span className={`badge ${user.role === 'manager' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200' : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'}`}>
+                                                <span className={`badge flex-shrink-0 ${user.role === 'manager' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200' : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'}`}>
                                                     {user.role}
                                                 </span>
                                             </div>
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-1 sm:gap-2 flex-shrink-0">
                                                 <button onClick={() => setEditingUser(user)} className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors" title="Edit">
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -369,6 +246,130 @@ const UserManagement = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Modal */}
+                {isModalOpen && (
+                    <div
+                        className="fixed inset-0 bg-black/20 backdrop-blur-2xl flex items-center justify-center z-50 p-4 transition-all duration-300"
+                        onClick={() => setIsModalOpen(false)}
+                    >
+                        <div
+                            className="glass rounded-2xl border border-white/10 shadow-2xl w-full max-w-md p-8 relative animate-fade-in overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-all"
+                                aria-label="Close modal"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+
+                            <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Add New User</h3>
+
+                            {successMessage && (
+                                <div className="mb-4 p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-green-700 dark:text-green-300 text-sm flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                    {successMessage}
+                                </div>
+                            )}
+
+                            {errorMessage && (
+                                <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-700 dark:text-red-300 text-sm flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    </svg>
+                                    {errorMessage}
+                                </div>
+                            )}
+
+                            <form onSubmit={handleAddUser} className="flex flex-col">
+                                <div className="mb-6">
+                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-white/70 mb-2">
+                                        Name <span className="text-pink-500">*</span>
+                                    </label>
+                                    <input
+                                        id="name"
+                                        type="text"
+                                        value={newUser.name}
+                                        onChange={(e) => handleChange('name', e.target.value)}
+                                        onBlur={() => handleBlur('name')}
+                                        className={`input-field ${errors.name && touched.name ? 'border-red-500 focus:ring-red-500' : ''}`}
+                                        placeholder="Joyrc"
+                                        disabled={isLoading}
+                                    />
+                                    {errors.name && touched.name && (
+                                        <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                                    )}
+                                </div>
+
+                                <div className="mb-6">
+                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-white/70 mb-2">
+                                        Email <span className="text-pink-500">*</span>
+                                    </label>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        value={newUser.email}
+                                        onChange={(e) => handleChange('email', e.target.value)}
+                                        onBlur={() => handleBlur('email')}
+                                        className={`input-field ${errors.email && touched.email ? 'border-red-500 focus:ring-red-500' : ''}`}
+                                        placeholder="joyrc@example.com"
+                                        disabled={isLoading}
+                                    />
+                                    {errors.email && touched.email && (
+                                        <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                                    )}
+                                </div>
+
+                                <div className="mb-8">
+                                    <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-white/70 mb-2">
+                                        Role
+                                    </label>
+                                    <select
+                                        id="role"
+                                        value={newUser.role}
+                                        onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                                        className="input-field cursor-pointer"
+                                        disabled={isLoading}
+                                    >
+                                        <option value="employee">Employee</option>
+                                        <option value="manager">Manager</option>
+                                    </select>
+                                </div>
+
+                                <div className="flex justify-end gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsModalOpen(false)}
+                                        className="px-6 py-2.5 rounded-lg border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200"
+                                        disabled={isLoading}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="btn-primary flex items-center justify-center min-w-[120px]"
+                                        disabled={!isFormValid() || isLoading}
+                                    >
+                                        {isLoading ? (
+                                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        ) : (
+                                            'Save User'
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

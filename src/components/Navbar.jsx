@@ -34,17 +34,18 @@ const Navbar = () => {
                         </span>
                     </Link>
 
-                    {/* Desktop Navigation */}
+                    {/* Manage Users Navigation */}
                     {user && user.email === import.meta.env.VITE_ADMIN_EMAIL && (
-                        <div className="hidden md:flex items-center">
+                        <div className="flex items-center">
                             <Link
                                 to="/users"
-                                className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-gray-600 hover:text-[#6C63FF] hover:bg-purple-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-white/5 transition-all"
+                                className="flex items-center gap-2 px-3 md:px-4 py-1.5 rounded-full text-sm font-medium text-gray-600 hover:text-[#6C63FF] hover:bg-purple-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-white/5 transition-all"
+                                title="Manage Users"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                 </svg>
-                                Manage Users
+                                <span className="hidden md:inline">Manage Users</span>
                             </Link>
                         </div>
                     )}
@@ -53,7 +54,7 @@ const Navbar = () => {
                 {/* Right Side Actions */}
                 <div className="flex items-center gap-4">
                     {user && (
-                        <div className="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-white/10">
+                        <div className="flex items-center gap-3 pl-4 ml-6 border-l border-gray-200 dark:border-white/10">
                             <div className="text-right hidden sm:block">
                                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">{user.displayName}</p>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>

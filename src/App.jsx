@@ -8,6 +8,9 @@ import EmployeeDashboard from './pages/EmployeeDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ManagerDashboard from './pages/ManagerDashboard';
 import UserManagement from './pages/UserManagement';
+import DemoAdminDashboard from './pages/DemoAdminDashboard';
+import DemoManagerDashboard from './pages/DemoManagerDashboard';
+import DemoEmployeeDashboard from './pages/DemoEmployeeDashboard';
 import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/Layout';
 
@@ -87,6 +90,10 @@ function App() {
                             )
                         }
                     />
+                    {/* Demo Routes - No authentication required */}
+                    <Route path="/demo/admin" element={<DemoAdminDashboard />} />
+                    <Route path="/demo/manager" element={<DemoManagerDashboard />} />
+                    <Route path="/demo/employee" element={<DemoEmployeeDashboard />} />
                 </Routes>
             </Router>
         </ThemeProvider>

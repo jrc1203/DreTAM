@@ -224,7 +224,7 @@ const EmployeeDashboard = () => {
                 </div>
 
                 {/* Filters */}
-                <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 relative z-50">
                     <ExportMenu data={filteredClaims} reportTitle="My Claims Report" />
 
                     <div className="flex gap-4 glass p-3 rounded-lg w-full md:w-auto">

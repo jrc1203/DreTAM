@@ -1,7 +1,7 @@
 import React from 'react';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -57,6 +57,33 @@ const Login = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
                             </button>
+
+                            {/* Demo Section */}
+                            <div className="mt-8 border-t border-gray-200 dark:border-white/10 pt-6">
+                                <p className="text-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                    Want to explore first? Try our demos:
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <Link to="/demo/admin" className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-medium text-sm transition-all hover:scale-105">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
+                                        </svg>
+                                        Admin
+                                    </Link>
+                                    <Link to="/demo/manager" className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium text-sm transition-all hover:scale-105">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                                        </svg>
+                                        Manager
+                                    </Link>
+                                    <Link to="/demo/employee" className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 text-green-700 dark:text-green-300 font-medium text-sm transition-all hover:scale-105">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                        </svg>
+                                        Employee
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
