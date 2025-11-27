@@ -30,3 +30,11 @@ yarn-error.log*
 !/.env.example
 node_modules
 /dist
+
+# Service account keys (if you create them later)
+*-service-account.json
+serviceAccountKey.json
+
+# Any private keys
+*.pem
+*.p12

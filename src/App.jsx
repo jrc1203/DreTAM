@@ -25,7 +25,7 @@ function App() {
                 // Check if user is Admin
                 if (currentUser.email === import.meta.env.VITE_ADMIN_EMAIL) {
                     setAuthorized(true);
-                    setUser(currentUser);
+                    setUser({ ...currentUser, role: 'admin' });
                 } else {
                     // Check if user is in 'users' collection
                     const q = query(collection(db, 'users'), where('email', '==', currentUser.email));
@@ -65,7 +65,7 @@ function App() {
                         element={
                             user && authorized ? (
                                 <Layout>
-                                    {user.email === import.meta.env.VITE_ADMIN_EMAIL ? (
+                                    {user.role === 'admin' ? (
                                         <AdminDashboard />
                                     ) : user.role === 'manager' ? (
                                         <ManagerDashboard />
@@ -81,7 +81,7 @@ function App() {
                     <Route
                         path="/users"
                         element={
-                            user && authorized && user.email === import.meta.env.VITE_ADMIN_EMAIL ? (
+                            user && authorized && (user.role === 'admin' || user.role === 'manager') ? (
                                 <Layout>
                                     <UserManagement />
                                 </Layout>

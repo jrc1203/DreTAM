@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, deleteDoc, getDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, deleteDoc, getDocs, where } from 'firebase/firestore';
 import { db, auth } from '../firebase';
 import Navbar from '../components/Navbar';
 
@@ -29,9 +29,13 @@ const UserManagement = () => {
                     return;
                 }
                 try {
-                    const userDoc = await getDoc(doc(db, 'users', user.uid));
-                    if (userDoc.exists()) {
-                        setCurrentUserRole(userDoc.data().role);
+                    // Query by email since doc ID might not match UID for users created via UI
+                    const q = query(collection(db, 'users'), where('email', '==', user.email));
+                    const querySnapshot = await getDocs(q);
+
+                    if (!querySnapshot.empty) {
+                        const userData = querySnapshot.docs[0].data();
+                        setCurrentUserRole(userData.role);
                     }
                 } catch (error) {
                     console.error("Error fetching user role:", error);
@@ -237,7 +241,12 @@ const UserManagement = () => {
                                                 disabled={currentUserRole === 'manager'}
                                             >
                                                 <option value="employee">Employee</option>
-                                                {currentUserRole === 'admin' && <option value="manager">Manager</option>}
+                                                {currentUserRole === 'admin' && (
+                                                    <>
+                                                        <option value="manager">Manager</option>
+                                                        <option value="admin">Admin</option>
+                                                    </>
+                                                )}
                                             </select>
                                             <div className="flex gap-2 ml-auto">
                                                 <button onClick={() => handleUpdateUser(editingUser)} className="btn-success px-3 sm:px-4 py-2 text-sm">Save</button>
@@ -252,8 +261,8 @@ const UserManagement = () => {
                                                     <span className="text-gray-500 dark:text-gray-400 text-sm truncate">{user.email}</span>
                                                 </div>
                                                 <span className={`badge flex-shrink-0 ${user.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200' :
-                                                        user.role === 'manager' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' :
-                                                            'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'
+                                                    user.role === 'manager' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' :
+                                                        'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'
                                                     }`}>
                                                     {user.role}
                                                 </span>
@@ -370,7 +379,12 @@ const UserManagement = () => {
                                         disabled={isLoading || currentUserRole === 'manager'}
                                     >
                                         <option value="employee">Employee</option>
-                                        {currentUserRole === 'admin' && <option value="manager">Manager</option>}
+                                        {currentUserRole === 'admin' && (
+                                            <>
+                                                <option value="manager">Manager</option>
+                                                <option value="admin">Admin</option>
+                                            </>
+                                        )}
                                     </select>
                                 </div>
 

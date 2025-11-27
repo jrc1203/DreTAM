@@ -161,8 +161,18 @@ const EmployeeDashboard = () => {
     });
 
     // Calculate Stats from Base Filter (Persistent)
-    const totalPending = baseFilteredClaims.filter(c => c.status === 'Pending').length;
-    const totalApproved = baseFilteredClaims.filter(c => c.status === 'Approved').length;
+    const pendingClaims = baseFilteredClaims.filter(c => c.status === 'Pending');
+    const totalPendingCount = pendingClaims.length;
+    const totalPendingAmount = pendingClaims.reduce((sum, c) => sum + Number(c.amount), 0);
+
+    const approvedClaims = baseFilteredClaims.filter(c => c.status === 'Approved');
+    const totalApprovedCount = approvedClaims.length;
+    const totalApprovedAmount = approvedClaims.reduce((sum, c) => sum + Number(c.amount), 0);
+
+    const rejectedClaims = baseFilteredClaims.filter(c => c.status === 'Rejected');
+    const totalRejectedCount = rejectedClaims.length;
+    const totalRejectedAmount = rejectedClaims.reduce((sum, c) => sum + Number(c.amount), 0);
+
     const totalAmount = baseFilteredClaims.reduce((sum, c) => sum + Number(c.amount), 0);
 
     if (isLoading) {
@@ -204,7 +214,7 @@ const EmployeeDashboard = () => {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <button
                         onClick={() => setStatusFilter('all')}
                         className={`stat-card stat-card-border-purple flex items-center justify-between cursor-pointer transition-all duration-300 ${statusFilter === 'all' ? '!bg-purple-100 dark:!bg-purple-900/40 border-purple-500 scale-105 shadow-lg' : 'hover:scale-105'}`}
@@ -230,8 +240,8 @@ const EmployeeDashboard = () => {
                         <div>
                             <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Pending Approval</h3>
                             <div className="mt-2">
-                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{totalPending}</p>
-                                <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">Awaiting approval</p>
+                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{formatCurrency(totalPendingAmount)}</p>
+                                <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">{totalPendingCount} awaiting approval</p>
                             </div>
                         </div>
                         <div className="icon-circle icon-circle-yellow">
@@ -248,13 +258,31 @@ const EmployeeDashboard = () => {
                         <div>
                             <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Total Approved</h3>
                             <div className="mt-2">
-                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{totalApproved}</p>
-                                <p className="text-sm font-medium text-green-600 dark:text-green-400">Claims processed</p>
+                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{formatCurrency(totalApprovedAmount)}</p>
+                                <p className="text-sm font-medium text-green-600 dark:text-green-400">{totalApprovedCount} claims processed</p>
                             </div>
                         </div>
                         <div className="icon-circle icon-circle-green">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </button>
+
+                    <button
+                        onClick={() => setStatusFilter('rejected')}
+                        className={`stat-card stat-card-border-red flex items-center justify-between cursor-pointer transition-all duration-300 ${statusFilter === 'rejected' ? '!bg-red-100 dark:!bg-red-900/40 border-red-500 scale-105 shadow-lg' : 'hover:scale-105'}`}
+                    >
+                        <div>
+                            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wider">Total Rejected</h3>
+                            <div className="mt-2">
+                                <p className="text-3xl font-bold text-gray-800 dark:text-white">{formatCurrency(totalRejectedAmount)}</p>
+                                <p className="text-sm font-medium text-red-600 dark:text-red-400">{totalRejectedCount} claims rejected</p>
+                            </div>
+                        </div>
+                        <div className="icon-circle icon-circle-red">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                     </button>
