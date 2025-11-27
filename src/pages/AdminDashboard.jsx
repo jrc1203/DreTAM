@@ -70,7 +70,7 @@ const AdminDashboard = () => {
 
     // Base filtered claims (ignoring status filter) for persistent stats
     const baseFilteredClaims = claims.filter(claim => {
-        if (filters.employee && claim.employeeEmail !== filters.employee) return false;
+        if (filters.employee && claim.email !== filters.employee) return false;
         if (filters.date && claim.date !== filters.date) return false;
         return true;
     });

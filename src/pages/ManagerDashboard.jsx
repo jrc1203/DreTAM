@@ -92,7 +92,7 @@ const ManagerDashboard = () => {
                 </div>
 
                 {/* Stats Cards - 4 columns */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
                     <button
                         onClick={() => setStatusFilter('all')}
                         className={`stat-card stat-card-border-purple flex items-center justify-between cursor-pointer transition-all duration-300 ${statusFilter === 'all' ? '!bg-purple-100 dark:!bg-purple-900/40 border-purple-500 scale-105 shadow-lg' : 'hover:scale-105'}`}
@@ -167,10 +167,10 @@ const ManagerDashboard = () => {
                 </div>
 
                 {/* Filters Section */}
-                <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 relative z-50">
+                <div className="flex flex-row flex-wrap justify-between items-center mb-6 gap-3 sm:gap-4 relative z-50">
                     <ExportMenu data={filteredClaims} reportTitle="Manager Claims Report" />
 
-                    <div className="flex flex-col sm:flex-row gap-4 items-center glass p-3 rounded-lg">
+                    <div className="flex flex-row gap-3 sm:gap-4 items-center glass p-3 rounded-lg flex-wrap sm:flex-nowrap">
                         <FilterDropdown
                             options={users.map(user => ({ value: user.email, label: user.name }))}
                             value={filters.employee}
